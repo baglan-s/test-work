@@ -1,0 +1,857 @@
+openapi: 3.0.3
+info:
+  title: Test work - OpenAPI 3.0
+  description: |-
+    Документация по главному Backend API
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: sarievbagi@gmail.com
+  version: 1.0.0
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+servers:
+  - url: http://localhost:6000/api
+paths:
+  /login:
+    post:
+      tags:
+        - Auth
+      summary: Аутентификация пользователя
+      description: Получить токен текущего пользователя
+      parameters:
+        - name: Accept
+          in: header
+          required: true
+          schema:
+            type: string
+          example: application/json
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: user@user.ru
+                password:
+                  type: string
+                  example: password
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UserTokenData'
+        '401':
+          description: (Unauthorized) Ошибка атворизации
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Incorrect user password.
+  
+  /register:
+    post:
+      tags:
+        - Auth
+      summary: Регистрация пользователя
+      description: Зарегистрировать нового пользователя
+      parameters:
+        - name: Accept
+          in: header
+          required: true
+          schema:
+            type: string
+          example: application/json
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password, password_confirmation]
+              properties:
+                name:
+                  type: string
+                  example: Иван Иванов
+                email:
+                  type: string
+                  example: ivanov@ivan.com
+                phone:
+                  type: string
+                  example: "+7-777-777-77-77"
+                password:
+                  type: string
+                  example: 1234325
+                password_confirmation:
+                  type: string
+                  example: 1234325
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UserTokenData'
+        '401':
+          description: (Unauthorized) Ошибка атворизации
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Incorrect user password.
+        '422':
+          description: Draft - Validation exception
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "The name field is required. (and 1 more error)"
+
+  /logout:
+    post:
+      tags:
+        - Auth
+      summary: Выход из системы
+      description: Удалить текущий токен пользователя
+      security:
+        - bearer: []
+      parameters:
+        - name: Accept
+          in: header
+          required: true
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          description: (Unauthorized) Ошибка атворизации
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+
+  /users:
+    get:
+      tags:
+        - Users
+      summary: Получить список пользователей
+      description: Метод позволяет получить список пользователей
+      security:
+        - bearer: []
+      parameters:
+        - name: Accept
+          in: header
+          required: true
+          schema:
+            type: string
+          example: application/json
+        - name: limit
+          in: query
+          description: Кол-во записей
+          example: 20
+          schema:
+            type: integer
+            format: int64
+        - name: page
+          in: query
+          description: Номер страницы
+          example: 1
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  meta:
+                    $ref: '#/components/schemas/Meta'
+                  link:
+                    $ref: '#/components/schemas/Link'
+        '401':
+          description: (Unauthorized) Ошибка атворизации
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+
+    post:
+      tags:
+        - Users
+      summary: Создать пользователя
+      description: Метод позволяет создать пользователя
+      security:
+        - bearer: []
+      parameters:
+        - name: Accept
+          in: header
+          required: true
+          schema:
+            type: string
+          example: application/json
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password, password_confirmation]
+              properties:
+                name:
+                  type: string
+                  example: Иван Иванов
+                email:
+                  type: string
+                  example: ivanov@ivan.com
+                phone:
+                  type: string
+                  example: "+7-777-777-77-77"
+                password:
+                  type: string
+                  example: 1234325
+                password_confirmation:
+                  type: string
+                  example: 1234325
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: (Unauthorized) Ошибка атворизации
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+        '422':
+          description: Draft - Validation exception
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "The name field is required. (and 1 more error)"
+  
+  /users/{id}:
+    get:
+      tags:
+        - Users
+      summary: Получить пользователя по ID
+      description: Метод позволяет получить пользователя по ID
+      security:
+        - bearer: []
+      parameters:
+        - name: Accept
+          in: header
+          required: true
+          schema:
+            type: string
+          example: application/json
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: (Unauthorized) Ошибка атворизации
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+        '404':
+          description: Сущность не найдена
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 404
+                      message:
+                        type: string
+                        example: Entity not found!
+
+    put:
+      tags:
+        - Users
+      summary: Изменить пользователя по ID
+      description: Метод позволяет изменить пользователя по ID
+      security:
+        - bearer: []
+      parameters:
+        - name: Accept
+          in: header
+          required: true
+          schema:
+            type: string
+          example: application/json
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Иван Иванов
+                email:
+                  type: string
+                  example: ivanov@ivan.com
+                password:
+                  type: string
+                  example: 1234325
+                password_confirmation:
+                  type: string
+                  example: 1234325
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: (Unauthorized) Ошибка атворизации
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+        '404':
+          description: Сущность не найдена
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 404
+                      message:
+                        type: string
+                        example: Entity not found!
+        '422':
+          description: Draft - Validation exception
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "The name field is required. (and 1 more error)"
+
+    delete:
+      tags:
+        - Users
+      summary: Удалить пользователя по ID
+      description: Метод позволяет удалить пользователя по ID
+      security:
+        - bearer: []
+      parameters:
+        - name: Accept
+          in: header
+          required: true
+          schema:
+            type: string
+          example: application/json
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          description: (Unauthorized) Ошибка атворизации
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+        '404':
+          description: Сущность не найдена
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 404
+                      message:
+                        type: string
+                        example: Entity not found!
+
+  /users/authenticated:
+    get:
+      tags:
+        - Users
+      summary: Получить текущего пользователя
+      description: Метод позволяет получить текущего пользователя
+      security:
+        - bearer: []
+      parameters:
+        - name: Accept
+          in: header
+          required: true
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: (Unauthorized) Ошибка атворизации
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+        '404':
+          description: Сущность не найдена
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 404
+                      message:
+                        type: string
+                        example: Entity not found!
+
+  /wallet:
+    get:
+      tags:
+        - Wallet
+      summary: Получить данные счета
+      description: Метод позволяет получить данные счета
+      security:
+        - bearer: []
+      parameters:
+        - name: Accept
+          in: header
+          required: true
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Wallet'
+        '401':
+          description: (Unauthorized) Ошибка атворизации
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+        '404':
+          description: Сущность не найдена
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 404
+                      message:
+                        type: string
+                        example: Entity not found!
+
+  /transactions:
+    get:
+      tags:
+        - Transactions
+      summary: Получить список транзакции пользователя по счету
+      description: Метод позволяет получить список транзакции пользователя по счету
+      security:
+        - bearer: []
+      parameters:
+        - name: Accept
+          in: header
+          required: true
+          schema:
+            type: string
+          example: application/json
+        - name: limit
+          in: query
+          description: Кол-во записей
+          example: 20
+          schema:
+            type: integer
+            format: int64
+        - name: page
+          in: query
+          description: Номер страницы
+          example: 1
+          schema:
+            type: integer
+            format: int64
+        - name: search
+          in: query
+          description: Строка для поиска по описанию
+          example: Bought tickets
+          schema:
+            type: string
+        - name: order_type
+          in: query
+          description: "Тип сортировки по дате (по новым 'asc', по старым 'desc')"
+          example: desc
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Transaction'
+                  meta:
+                    $ref: '#/components/schemas/Meta'
+                  link:
+                    $ref: '#/components/schemas/Link'
+        '401':
+          description: (Unauthorized) Ошибка атворизации
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Unauthenticated.
+
+components:
+  schemas:
+    ErrorValidation:
+      type: object
+      properties:
+        message:
+          type: string
+          example: The name field is required. (and 2 more errors)
+        errors:
+          type: object
+          nullable: true
+      xml:
+        name: '##error-validation'
+    Meta:
+      type: object
+      properties:
+        current_page:
+          type: integer
+          format: int32
+          example: 1
+        from:
+          type: integer
+          nullable: true
+          format: int32
+          example: 10
+        last_page:
+          type: integer
+          format: int32
+          example: 10
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/MetaLink'
+        path:
+          type: string
+          example: https://stage.api.mazzon.ru/categories
+        per_page:
+          type: integer
+          format: int32
+          example: 10
+        to:
+          type: integer
+          nullable: true
+          format: int32
+          example: 10
+        total:
+          type: integer
+          format: int32
+          example: 10
+      xml:
+        name: '##meta'
+    Link:
+      type: object
+      properties:
+        first:
+          type: string
+          nullable: true
+          example: https://stage.api.mazzon.ru/categories?page=1
+        next:
+          type: string
+          nullable: true
+          example: https://stage.api.mazzon.ru/categories?page=2
+        last:
+          type: string
+          nullable: true
+          example: https://stage.api.mazzon.ru/categories?page=10
+        prev:
+          type: string
+          nullable: true
+          example: https://stage.api.mazzon.ru/categories
+      xml:
+        name: '##link'
+    MetaLink:
+      type: object
+      properties:
+        url:
+          type: string
+          nullable: true
+          example: https://stage.api.mazzon.ru/categories?page=1
+        label:
+          type: string
+          nullable: true
+          example: Next &raquo;
+        active:
+          type: boolean
+          nullable: true
+          example: true
+      xml:
+        name: '##metalink'
+    UserTokenData:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        token:
+          type: string
+          nullable: true
+          example: "4|MKwytytimtAsuTZBJoHxRob6cW2xioOw8YVxFNU7ecc39fda"
+      xml:
+        name: '##token_data'
+
+    Wallet:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        user_id:
+          type: integer
+          format: int64
+          example: 2
+        balance:
+          type: float
+          example: 3000.00
+        created_at:
+          type: string
+          example: "2024-05-03T11:01:13.000000Z"
+        updated_at:
+          type: string
+          example: "2024-05-03T11:01:13.000000Z"
+      xml:
+        name: '##wallet'
+
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        wallet_id:
+          type: integer
+          format: int64
+          example: 2
+        type:
+          type: string
+          example: income
+        description:
+          type: string
+          example: Bought movie tickets
+        created_at:
+          type: string
+          example: "2024-05-03T11:01:13.000000Z"
+        updated_at:
+          type: string
+          example: "2024-05-03T11:01:13.000000Z"
+      xml:
+        name: '##transaction'
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: Admin
+        email:
+          type: string
+          example: ivan@test.com
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Role'
+        created_at:
+          type: string
+          example: "2024-05-03T11:01:13.000000Z"
+        updated_at:
+          type: string
+          example: "2024-05-03T11:01:13.000000Z"
+      xml:
+        name: '##user'
+    Role:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: Администратор
+        slug:
+          type: string
+          example: admin
+        created_at:
+          type: string
+          example: "2024-04-02T11:01:13.000000Z"
+        updated_at:
+          type: string
+          example: "2024-04-02T11:01:13.000000Z"
+      xml:
+        name: '##role'
+  securitySchemes:
+    bearer:
+      type: apiKey
+      description: Bearer Token to authorize requests. If you don't have an User API Token, use method `/login` for get Bearer token.
+      name: Authorization
+      in: header
